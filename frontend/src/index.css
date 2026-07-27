@@ -60,7 +60,8 @@ h2 { font: 400 22px/1.2 var(--font-display); margin: 24px 0 10px; }
 
 .app-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: calc(env(safe-area-inset-top,0px) + 14px) 20px 14px;
+  gap: 12px;
+  padding: max(env(safe-area-inset-top, 0px) + 14px, 54px) 20px 14px;
   background: var(--paper);
   border-bottom: 1px solid var(--line);
 }
@@ -85,17 +86,15 @@ h2 { font: 400 22px/1.2 var(--font-display); margin: 24px 0 10px; }
 }
 .bottom-nav a {
   flex: 1; text-align: center;
-  padding: 13px 0 10px;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 11px 0 10px;
   font: 600 11px/1 var(--font-ui);
   color: var(--ink-38);
   min-height: 44px;
 }
+.bottom-nav a svg { width: 22px; height: 22px; }
 .bottom-nav a.active { color: var(--pine); font-weight: 700; border-top: 2px solid var(--rust); margin-top: -1px; }
-.bottom-nav a:last-child {
-  color: var(--rust);
-  font-weight: 700;
-}
-.bottom-nav a:last-child::before { content: '+ '; }
+.bottom-nav a:last-child { color: var(--rust); font-weight: 700; }
 
 /* --------------------------------------------------------------------------
    Forms
@@ -136,8 +135,13 @@ button[type="submit"]:disabled { opacity: .5; cursor: default; }
 /* --------------------------------------------------------------------------
    Trip list / filters
    -------------------------------------------------------------------------- */
-.trip-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
-.trip-filters input { flex: 1; min-width: 130px; }
+.trip-filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.trip-filters > input:first-child { grid-column: 1 / -1; border-radius: 999px; }
 
 .trip-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .trip-list-item {
@@ -186,6 +190,11 @@ button[type="submit"]:disabled { opacity: .5; cursor: default; }
 .trips-map { height: 70vh; }
 .leaflet-container { font-family: var(--font-ui); background: var(--sand-deep); }
 .leaflet-popup-content-wrapper { border-radius: 12px; font: 500 13px/1.4 var(--font-ui); }
+/* Leaflet panes default to z-index 400-700 — any button or label placed over a map
+   (back/edit buttons, page titles, "no location" banners) must clear that. */
+.map-page h1, .trip-detail-page .location-picker-map ~ *, .trip-detail-page > a, .trip-detail-page button {
+  position: relative; z-index: 500;
+}
 
 /* --------------------------------------------------------------------------
    Photos
