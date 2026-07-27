@@ -3,9 +3,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import LocationPicker from "../components/map/LocationPicker";
-import { useCreateTrip, useTrip, useUpdateTrip } from "../hooks/useTrips";
+import { useCreateTrip, useDeleteTrip, useTrip, useUpdateTrip } from "../hooks/useTrips";
 import { tripFormSchema, type TripFormValues } from "../schemas/tripForm";
-import type { TripPayload } from "../types/trip";
+import type { PriceInputMode, TripPayload } from "../types/trip";
 
 const defaultValues: TripFormValues = {
   location_name: "",
@@ -23,6 +23,18 @@ const defaultValues: TripFormValues = {
   notes: undefined,
 };
 
+const PRICE_MODES: { value: PriceInputMode; label: string }[] = [
+  { value: "per_night", label: "Per night" },
+  { value: "total", label: "Total" },
+  { value: "none", label: "No price" },
+];
+
+function computeNights(start: string, end: string): number {
+  if (!start || !end) return 0;
+  const ms = new Date(`${end}T00:00:00`).getTime() - new Date(`${start}T00:00:00`).getTime();
+  return Math.round(ms / 86400000);
+}
+
 export default function TripFormPage() {
   const { id } = useParams<{ id: string }>();
   const isEdit = Boolean(id);
@@ -31,6 +43,7 @@ export default function TripFormPage() {
   const { data: existingTrip } = useTrip(id);
   const createTrip = useCreateTrip();
   const updateTrip = useUpdateTrip(id ?? "");
+  const deleteTrip = useDeleteTrip();
 
   const {
     register,
@@ -65,9 +78,36 @@ export default function TripFormPage() {
   }, [existingTrip, reset]);
 
   const priceMode = watch("price_input_mode");
+  const currency = watch("currency");
+  const startDate = watch("start_date");
+  const endDate = watch("end_date");
+  const priceTotal = watch("price_total");
+  const pricePerNight = watch("price_per_night_input");
+  const starRating = watch("star_rating");
   const latitude = watch("latitude");
   const longitude = watch("longitude");
   const locationValue = latitude !== undefined && longitude !== undefined ? { lat: latitude, lng: longitude } : null;
+
+  const nights = computeNights(startDate, endDate);
+  const nightsHint =
+    nights >= 1
+      ? `${nights} ${nights === 1 ? "night" : "nights"}`
+      : startDate && endDate
+        ? "Departure must be after arrival"
+        : "";
+
+  const derivedTotal =
+    priceMode === "per_night" && pricePerNight !== undefined && nights >= 1
+      ? pricePerNight * nights
+      : priceMode === "total"
+        ? priceTotal
+        : undefined;
+  const priceDerivedHint =
+    priceMode === "none"
+      ? "Not counted in stats"
+      : derivedTotal !== undefined
+        ? `Total ${derivedTotal} ${currency} for ${nights} ${nights === 1 ? "night" : "nights"}`
+        : "";
 
   function handleLocationChange(value: { lat: number; lng: number }) {
     setValue("latitude", value.lat, { shouldDirty: true, shouldValidate: true });
@@ -100,109 +140,148 @@ export default function TripFormPage() {
     navigate(`/trips/${trip.id}`, { replace: true });
   }
 
+  async function handleDelete() {
+    if (!id) return;
+    if (!window.confirm("Delete this trip? This cannot be undone.")) return;
+    await deleteTrip.mutateAsync(id);
+    navigate("/", { replace: true });
+  }
+
   return (
     <div className="trip-form-page">
-      <h1>{isEdit ? "Edit trip" : "New trip"}</h1>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <label>
-          Location name
-          <input {...register("location_name")} />
+      <div className="trip-form-header">
+        <button type="button" className="trip-form-cancel" onClick={() => navigate(-1)}>
+          Cancel
+        </button>
+        <span className="trip-form-title">{isEdit ? "Edit trip" : "New trip"}</span>
+        <button type="submit" form="trip-form" className="trip-form-save" disabled={isSubmitting}>
+          Save
+        </button>
+      </div>
+
+      <form id="trip-form" onSubmit={handleSubmit(onSubmit)}>
+        <div className="form-field">
+          <label className="form-field-label" htmlFor="location_name">
+            Location
+          </label>
+          <input id="location_name" placeholder="e.g. Trosa Havsbad och Camping" {...register("location_name")} />
           {errors.location_name && (
             <span className="form-error" role="alert">
               {errors.location_name.message}
             </span>
           )}
-        </label>
 
-        <label>
-          Area / region
-          <input {...register("place_area")} />
-        </label>
+          <div className="form-grid-2">
+            <input placeholder="Area / region" {...register("place_area")} />
+            <input placeholder="Plot / site" {...register("plot_number")} />
+          </div>
+        </div>
 
-        <label>
-          Plot / site
-          <input {...register("plot_number")} />
-        </label>
+        <div className="form-field">
+          <span className="form-field-label">Date</span>
+          <div className="date-boxes">
+            <div className="date-box">
+              <span className="date-box-label">Arrival</span>
+              <input type="date" {...register("start_date")} />
+            </div>
+            <div className="date-box">
+              <span className="date-box-label">Departure</span>
+              <input type="date" {...register("end_date")} />
+            </div>
+          </div>
+          {nightsHint && <span className="form-hint">{nightsHint}</span>}
+          {errors.end_date && (
+            <span className="form-error" role="alert">
+              {errors.end_date.message}
+            </span>
+          )}
+        </div>
 
-        <div>
-          <span className="location-picker-label">Location</span>
+        <div className="form-field">
+          <span className="form-field-label">Price</span>
+          <div className="chip-row chip-row--seg">
+            {PRICE_MODES.map((mode) => (
+              <button
+                key={mode.value}
+                type="button"
+                className={priceMode === mode.value ? "chip chip--seg active" : "chip chip--seg"}
+                onClick={() => setValue("price_input_mode", mode.value, { shouldValidate: true })}
+              >
+                {mode.label}
+              </button>
+            ))}
+          </div>
+
+          {priceMode !== "none" && (
+            <>
+              <div className="price-box">
+                {priceMode === "total" ? (
+                  <input type="number" step="0.01" placeholder="0" {...register("price_total")} />
+                ) : (
+                  <input type="number" step="0.01" placeholder="0" {...register("price_per_night_input")} />
+                )}
+                <span className="price-box-unit">{priceMode === "per_night" ? `${currency} / night` : `${currency} total`}</span>
+              </div>
+              {errors.price_total && (
+                <span className="form-error" role="alert">
+                  {errors.price_total.message}
+                </span>
+              )}
+              {errors.price_per_night_input && (
+                <span className="form-error" role="alert">
+                  {errors.price_per_night_input.message}
+                </span>
+              )}
+            </>
+          )}
+          {priceDerivedHint && <span className="form-hint">{priceDerivedHint}</span>}
+
+          <div className="form-grid-2 currency-row">
+            <label className="currency-field">
+              Currency
+              <input {...register("currency")} maxLength={3} />
+            </label>
+          </div>
+        </div>
+
+        <div className="form-field">
+          <span className="form-field-label">Rating</span>
+          <div className="star-picker">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button
+                key={n}
+                type="button"
+                className={starRating !== undefined && starRating >= n ? "star-button active" : "star-button"}
+                onClick={() => setValue("star_rating", starRating === n ? undefined : n, { shouldDirty: true })}
+              >
+                ★
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="form-field">
+          <span className="form-field-label">Location</span>
           <LocationPicker value={locationValue} onChange={handleLocationChange} onClear={handleLocationClear} />
         </div>
 
-        <div className="date-range">
-          <label>
-            Start date
-            <input type="date" {...register("start_date")} />
+        <div className="form-field">
+          <label className="form-field-label" htmlFor="notes">
+            Notes
           </label>
-          <label>
-            End date
-            <input type="date" {...register("end_date")} />
-          </label>
+          <textarea
+            id="notes"
+            rows={4}
+            placeholder="Service building, location, neighbors, anything…"
+            {...register("notes")}
+          />
         </div>
-        {errors.end_date && (
-          <span className="form-error" role="alert">
-            {errors.end_date.message}
-          </span>
+
+        {isEdit && (
+          <button type="button" className="trip-form-delete" onClick={handleDelete} disabled={deleteTrip.isPending}>
+            Delete this trip
+          </button>
         )}
-
-        <label>
-          Price
-          <select {...register("price_input_mode")}>
-            <option value="none">Not recorded</option>
-            <option value="total">Total for stay</option>
-            <option value="per_night">Per night</option>
-          </select>
-        </label>
-
-        {priceMode === "total" && (
-          <label>
-            Total price
-            <input type="number" step="0.01" {...register("price_total")} />
-            {errors.price_total && (
-              <span className="form-error" role="alert">
-                {errors.price_total.message}
-              </span>
-            )}
-          </label>
-        )}
-
-        {priceMode === "per_night" && (
-          <label>
-            Price per night
-            <input type="number" step="0.01" {...register("price_per_night_input")} />
-            {errors.price_per_night_input && (
-              <span className="form-error" role="alert">
-                {errors.price_per_night_input.message}
-              </span>
-            )}
-          </label>
-        )}
-
-        <label>
-          Currency
-          <input {...register("currency")} maxLength={3} />
-        </label>
-
-        <label>
-          Rating
-          <select {...register("star_rating")}>
-            <option value="">Not rated</option>
-            {[1, 2, 3, 4, 5].map((n) => (
-              <option key={n} value={n}>
-                {"★".repeat(n)}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label>
-          Notes
-          <textarea rows={4} {...register("notes")} />
-        </label>
-
-        <button type="submit" disabled={isSubmitting}>
-          {isEdit ? "Save changes" : "Log trip"}
-        </button>
       </form>
     </div>
   );

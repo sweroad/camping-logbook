@@ -1,13 +1,38 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
+import TripHeroMap from "../components/map/TripHeroMap";
 import PhotoGallery from "../components/photo/PhotoGallery";
 import PhotoUploader from "../components/photo/PhotoUploader";
-import { useDeleteTrip, useTrip } from "../hooks/useTrips";
+import { useTrip } from "../hooks/useTrips";
+import type { Trip } from "../types/trip";
+
+function formatPriceValue(trip: Pick<Trip, "price_total" | "currency">): string {
+  if (trip.price_total === null) return "Missing";
+  if (trip.price_total === 0) return "Free";
+  return `${trip.price_total} ${trip.currency}`;
+}
+
+function formatPriceLabel(trip: Pick<Trip, "price_input_mode" | "price_per_night_input">): string {
+  if (trip.price_input_mode === "per_night" && trip.price_per_night_input !== null) {
+    return `Price (${trip.price_per_night_input}/night)`;
+  }
+  return "Price";
+}
+
+function formatAreaLine(trip: Pick<Trip, "place_area" | "plot_number">): string {
+  const parts = [trip.place_area, trip.plot_number ? `Plot ${trip.plot_number}` : null].filter(
+    (part): part is string => Boolean(part),
+  );
+  return parts.length > 0 ? parts.join(" · ") : "No area given";
+}
+
+function formatDate(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString();
+}
 
 export default function TripDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: trip, isLoading, isError } = useTrip(id);
-  const deleteTrip = useDeleteTrip();
 
   if (isLoading) return <p>Loading...</p>;
   if (isError || !trip) {
@@ -18,37 +43,66 @@ export default function TripDetailPage() {
     );
   }
 
-  async function handleDelete() {
-    if (!id) return;
-    if (!window.confirm("Delete this trip? This cannot be undone.")) return;
-    await deleteTrip.mutateAsync(id);
-    navigate("/", { replace: true });
-  }
+  const facts = [
+    { label: "Date", value: `${formatDate(trip.start_date)} – ${formatDate(trip.end_date)}` },
+    { label: "Nights", value: String(trip.nights) },
+    { label: formatPriceLabel(trip), value: formatPriceValue(trip) },
+    {
+      label: "Position",
+      value:
+        trip.latitude !== null && trip.longitude !== null
+          ? `${trip.latitude.toFixed(4)}, ${trip.longitude.toFixed(4)}`
+          : "Missing",
+    },
+  ];
 
   return (
     <div className="trip-detail-page">
-      <h1>{trip.location_name}</h1>
-      {trip.place_area && <p>{trip.place_area}</p>}
-      {trip.plot_number && <p>Plot: {trip.plot_number}</p>}
-      <p>
-        {trip.start_date} → {trip.end_date} ({trip.nights} {trip.nights === 1 ? "night" : "nights"})
-      </p>
-      {trip.price_total !== null && (
-        <p>
-          {trip.price_total} {trip.currency}
-        </p>
-      )}
-      {trip.star_rating && <p>{"★".repeat(trip.star_rating)}</p>}
-      {trip.notes && <p>{trip.notes}</p>}
-
-      <PhotoGallery tripId={trip.id} photos={trip.photos} />
-      <PhotoUploader tripId={trip.id} />
-
-      <div className="trip-detail-actions">
-        <Link to={`/trips/${trip.id}/edit`}>Edit</Link>
-        <button type="button" onClick={handleDelete} disabled={deleteTrip.isPending}>
-          Delete
+      <div className="trip-hero">
+        <TripHeroMap latitude={trip.latitude} longitude={trip.longitude} />
+        <button type="button" className="trip-hero-back" onClick={() => navigate(-1)} aria-label="Back">
+          ←
         </button>
+        <Link to={`/trips/${trip.id}/edit`} className="trip-hero-edit">
+          Edit
+        </Link>
+      </div>
+
+      <div className="trip-detail-body">
+        <h1>{trip.location_name}</h1>
+        <p className="trip-detail-area">{formatAreaLine(trip)}</p>
+        {trip.star_rating && <p className="trip-detail-stars">{"★".repeat(trip.star_rating)}</p>}
+
+        <div className="trip-fact-grid">
+          {facts.map((fact) => (
+            <div className="trip-fact" key={fact.label}>
+              <span className="trip-fact-label">{fact.label}</span>
+              <span className="trip-fact-value">{fact.value}</span>
+            </div>
+          ))}
+        </div>
+
+        {trip.notes && (
+          <div className="trip-note">
+            <span className="trip-note-label">Note</span>
+            <p className="trip-note-text">{trip.notes}</p>
+          </div>
+        )}
+
+        <div className="trip-photos-section">
+          <div className="trip-photos-head">
+            <span className="trip-photos-label">Photos</span>
+            <PhotoUploader tripId={trip.id} />
+          </div>
+          <PhotoGallery tripId={trip.id} photos={trip.photos} />
+          <p className="photo-uploader-hint">
+            On Android, you can also share photos straight from your Gallery or Camera app into Camping Logbook.
+          </p>
+        </div>
+
+        <p className="trip-audit">
+          Created {formatDate(trip.created_at)} · last edited {formatDate(trip.updated_at)}
+        </p>
       </div>
     </div>
   );

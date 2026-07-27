@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import type { LatLngLiteral } from "leaflet";
-import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
+import { MapContainer, Marker, useMap, useMapEvents } from "react-leaflet";
+import VlTileLayer from "./VlTileLayer";
+import { createPinIcon } from "./pinIcon";
 
 interface LocationPickerProps {
   value: LatLngLiteral | null;
@@ -70,15 +72,13 @@ export default function LocationPicker({ value, onChange, onClear }: LocationPic
         </span>
       )}
       <MapContainer center={value ?? DEFAULT_CENTER} zoom={value ? 13 : 5} className="location-picker-map">
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
+        <VlTileLayer />
         <ClickHandler onChange={onChange} />
         <RecenterOnChange value={value} />
         {value && (
           <Marker
             position={value}
+            icon={createPinIcon()}
             draggable
             eventHandlers={{
               dragend: (e) => {

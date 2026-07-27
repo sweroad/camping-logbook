@@ -30,7 +30,7 @@ export default function PhotoUploader({ tripId }: PhotoUploaderProps) {
   return (
     <div className="photo-uploader">
       <label className="photo-uploader-label">
-        {isUploading ? "Uploading..." : "Add photos"}
+        {isUploading ? "Uploading..." : "+ Add"}
         <input
           ref={inputRef}
           type="file"
@@ -46,9 +46,6 @@ export default function PhotoUploader({ tripId }: PhotoUploaderProps) {
           {error}
         </span>
       )}
-      <p className="photo-uploader-hint">
-        On Android, you can also share photos straight from your Gallery or Camera app into Camping Logbook.
-      </p>
     </div>
   );
 }

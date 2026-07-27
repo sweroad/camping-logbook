@@ -9,9 +9,10 @@ export function useStatsSummary(range: StatsRange) {
   });
 }
 
-export function useStatsByMonth(range: StatsRange) {
+export function useStatsByMonth(range: StatsRange, enabled = true) {
   return useQuery({
     queryKey: ["stats", "by_month", range],
     queryFn: () => getStatsByMonth(range),
+    enabled,
   });
 }
