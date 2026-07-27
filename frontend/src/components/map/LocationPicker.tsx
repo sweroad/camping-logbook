@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type KeyboardEvent } from "react";
 import type { LatLngLiteral } from "leaflet";
 import { MapContainer, Marker, useMap, useMapEvents } from "react-leaflet";
+import { searchPlaces, type GeocodeResult } from "../../api/geocode";
 import VlTileLayer from "./VlTileLayer";
 import { createPinIcon } from "./pinIcon";
 
@@ -33,6 +34,10 @@ function RecenterOnChange({ value }: { value: LatLngLiteral | null }) {
 
 export default function LocationPicker({ value, onChange, onClear }: LocationPickerProps) {
   const [geoError, setGeoError] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<GeocodeResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   function useMyLocation() {
     if (!navigator.geolocation) {
@@ -49,8 +54,67 @@ export default function LocationPicker({ value, onChange, onClear }: LocationPic
     );
   }
 
+  async function handleSearch() {
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    setIsSearching(true);
+    setSearchError(null);
+    try {
+      const found = await searchPlaces(trimmed);
+      setResults(found);
+      if (found.length === 0) setSearchError("No matches found.");
+    } catch {
+      setSearchError("Search failed. Try again.");
+    } finally {
+      setIsSearching(false);
+    }
+  }
+
+  function handleSearchKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    // This input lives inside the trip form — prevent Enter from submitting it.
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleSearch();
+    }
+  }
+
+  function handleSelectResult(result: GeocodeResult) {
+    onChange({ lat: parseFloat(result.lat), lng: parseFloat(result.lon) });
+    setQuery(result.display_name);
+    setResults([]);
+  }
+
   return (
     <div className="location-picker">
+      <div className="location-search">
+        <input
+          type="search"
+          placeholder="Search for a place..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={handleSearchKeyDown}
+        />
+        <button type="button" onClick={handleSearch} disabled={isSearching}>
+          {isSearching ? "Searching..." : "Search"}
+        </button>
+      </div>
+      {searchError && (
+        <span className="form-error" role="alert">
+          {searchError}
+        </span>
+      )}
+      {results.length > 0 && (
+        <ul className="location-search-results">
+          {results.map((result, index) => (
+            <li key={`${result.lat},${result.lon},${index}`}>
+              <button type="button" onClick={() => handleSelectResult(result)}>
+                {result.display_name}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
       <div className="location-picker-controls">
         <button type="button" onClick={useMyLocation}>
           Use my location

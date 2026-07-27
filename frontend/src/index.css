@@ -328,6 +328,31 @@ button[type="submit"]:disabled { opacity: .5; cursor: default; }
    -------------------------------------------------------------------------- */
 .location-picker-label { font: 600 11px/1 var(--font-ui); letter-spacing: .04em; color: var(--ink-55); }
 .location-picker { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+
+.location-search { display: flex; gap: 8px; }
+.location-search input { flex: 1; min-width: 0; }
+.location-search button {
+  width: auto; padding: 11px 16px; min-height: 44px;
+  background: var(--pine); color: var(--paper); border: 0; border-radius: 11px;
+  font: 600 12.5px/1 var(--font-ui); cursor: pointer;
+}
+.location-search button:disabled { opacity: .5; cursor: default; }
+
+.location-search-results {
+  list-style: none; margin: 0; padding: 0;
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+  overflow: hidden;
+}
+.location-search-results li { border-bottom: 1px solid var(--line); }
+.location-search-results li:last-child { border-bottom: 0; }
+.location-search-results button {
+  display: block; width: 100%; text-align: left;
+  padding: 10px 12px; min-height: 0;
+  background: none; border: 0; border-radius: 0;
+  font: 500 13px/1.4 var(--font-ui); color: var(--ink); cursor: pointer;
+}
+.location-search-results button:hover { background: var(--sand); }
+
 .location-picker-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .location-picker-controls button {
   width: auto; padding: 11px 16px; min-height: 44px;
