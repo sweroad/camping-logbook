@@ -43,6 +43,7 @@ def list_trips(
             or_(
                 Trip.location_name.ilike(pattern),
                 Trip.place_area.ilike(pattern),
+                Trip.country.ilike(pattern),
                 Trip.notes.ilike(pattern),
             )
         )

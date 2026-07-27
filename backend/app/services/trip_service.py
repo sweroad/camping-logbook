@@ -55,6 +55,7 @@ def build_trip(data: TripCreate, user_id: uuid.UUID) -> Trip:
         location_name=data.location_name,
         place_area=data.place_area,
         plot_number=data.plot_number,
+        country=data.country,
         latitude=data.latitude,
         longitude=data.longitude,
         start_date=data.start_date,

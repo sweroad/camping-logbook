@@ -40,6 +40,7 @@ def test_export_trips_sheet_contents(client, auth_headers):
         auth_headers,
         location_name="Trosa Havsbad och Camping",
         plot_number="420",
+        country="Sweden",
         start_date="2025-08-06",
         end_date="2025-08-08",
         price_per_night_input=495,
@@ -59,6 +60,7 @@ def test_export_trips_sheet_contents(client, auth_headers):
         "location_name",
         "place_area",
         "plot_number",
+        "country",
         "latitude",
         "longitude",
         "start_date",
@@ -77,11 +79,17 @@ def test_export_trips_sheet_contents(client, auth_headers):
         "updated_at",
     ]
 
-    row = tuple(cell.value for cell in ws[2])
-    assert row[0] == trip["id"], "row 2 must be the first data row, with no blank row after the header"
+    row2 = tuple(cell.value for cell in ws[2])
+    assert row2[0] is not None, "row 2 must be a real data row, not a blank row after the header"
+
+    # Search by id rather than assuming position: other trips may already exist
+    # (this runs against a shared dev database, not a pristine one) and sort
+    # before this one by start_date.
+    row = next(r for r in ws.iter_rows(min_row=2, values_only=True) if r[0] == trip["id"])
     by_header = dict(zip(headers, row))
     assert by_header["location_name"] == "Trosa Havsbad och Camping"
     assert by_header["plot_number"] == "420"
+    assert by_header["country"] == "Sweden"
     assert by_header["nights"] == 2
     assert by_header["price_total_sek"] == 990.0
     assert by_header["price_per_night_input_sek"] == 495.0

@@ -18,8 +18,8 @@ function formatPriceLabel(trip: Pick<Trip, "price_input_mode" | "price_per_night
   return "Price";
 }
 
-function formatAreaLine(trip: Pick<Trip, "place_area" | "plot_number">): string {
-  const parts = [trip.place_area, trip.plot_number ? `Plot ${trip.plot_number}` : null].filter(
+function formatAreaLine(trip: Pick<Trip, "place_area" | "plot_number" | "country">): string {
+  const parts = [trip.place_area, trip.plot_number ? `Plot ${trip.plot_number}` : null, trip.country].filter(
     (part): part is string => Boolean(part),
   );
   return parts.length > 0 ? parts.join(" · ") : "No area given";

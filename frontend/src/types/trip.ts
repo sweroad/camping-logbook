@@ -17,6 +17,7 @@ export interface Trip {
   location_name: string;
   place_area: string | null;
   plot_number: string | null;
+  country: string | null;
   latitude: number | null;
   longitude: number | null;
   start_date: string;
@@ -42,6 +43,7 @@ export interface TripPayload {
   location_name: string;
   place_area?: string | null;
   plot_number?: string | null;
+  country?: string | null;
   latitude?: number | null;
   longitude?: number | null;
   start_date: string;

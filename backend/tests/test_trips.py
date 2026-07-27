@@ -77,6 +77,48 @@ def test_create_trip_with_place_area(client, auth_headers):
     assert response.json()["place_area"] == "Varberg"
 
 
+def test_create_trip_with_country(client, auth_headers):
+    payload = {
+        "location_name": "Fricamping, Holkekärrnäs skans",
+        "country": "Sweden",
+        "start_date": "2026-07-13",
+        "end_date": "2026-07-14",
+        "price_input_mode": "none",
+    }
+    response = client.post("/api/trips", json=payload, headers=auth_headers)
+    assert response.status_code == 201, response.text
+    assert response.json()["country"] == "Sweden"
+
+
+def test_create_trip_without_country_defaults_to_null(client, auth_headers):
+    payload = {
+        "location_name": "No Country Camp",
+        "start_date": "2026-01-01",
+        "end_date": "2026-01-02",
+        "price_input_mode": "none",
+    }
+    response = client.post("/api/trips", json=payload, headers=auth_headers)
+    assert response.status_code == 201, response.text
+    assert response.json()["country"] is None
+
+
+def test_update_trip_country(client, auth_headers):
+    payload = {
+        "location_name": "Country Update Camp",
+        "start_date": "2026-02-01",
+        "end_date": "2026-02-02",
+        "price_input_mode": "none",
+    }
+    created = client.post("/api/trips", json=payload, headers=auth_headers).json()
+    assert created["country"] is None
+
+    response = client.patch(
+        f"/api/trips/{created['id']}", json={"country": "Norway"}, headers=auth_headers
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["country"] == "Norway"
+
+
 def test_create_trip_missing_price(client, auth_headers):
     # 2026-05-16, Ugglarps camping, Falkenberg -- no price given at all
     payload = {
@@ -174,13 +216,23 @@ def test_list_trips_date_range_filter(client, auth_headers):
 
 
 def test_list_trips_text_search(client, auth_headers):
-    _create(client, auth_headers, location_name="Trosa Havsbad och Camping")
-    _create(client, auth_headers, location_name="Ugglarps camping")
+    _create(client, auth_headers, location_name="Zzyzx Search Test Camp")
+    _create(client, auth_headers, location_name="Unrelated Other Camp")
 
-    response = client.get("/api/trips", params={"q": "Trosa"}, headers=auth_headers)
+    response = client.get("/api/trips", params={"q": "Zzyzx"}, headers=auth_headers)
     assert response.status_code == 200
     names = [item["location_name"] for item in response.json()["items"]]
-    assert names == ["Trosa Havsbad och Camping"]
+    assert names == ["Zzyzx Search Test Camp"]
+
+
+def test_list_trips_text_search_matches_country(client, auth_headers):
+    _create(client, auth_headers, location_name="Zzyzx Country Camp", country="Zzyzxland")
+    _create(client, auth_headers, location_name="Unrelated Country Camp", country="Elsewhere")
+
+    response = client.get("/api/trips", params={"q": "Zzyzxland"}, headers=auth_headers)
+    assert response.status_code == 200
+    names = [item["location_name"] for item in response.json()["items"]]
+    assert names == ["Zzyzx Country Camp"]
 
 
 def test_update_trip_recomputes_price_on_date_change(client, auth_headers):

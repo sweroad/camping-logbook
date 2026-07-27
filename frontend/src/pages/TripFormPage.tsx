@@ -11,6 +11,7 @@ const defaultValues: TripFormValues = {
   location_name: "",
   place_area: undefined,
   plot_number: undefined,
+  country: undefined,
   latitude: undefined,
   longitude: undefined,
   start_date: "",
@@ -63,6 +64,7 @@ export default function TripFormPage() {
         location_name: existingTrip.location_name,
         place_area: existingTrip.place_area ?? undefined,
         plot_number: existingTrip.plot_number ?? undefined,
+        country: existingTrip.country ?? undefined,
         latitude: existingTrip.latitude ?? undefined,
         longitude: existingTrip.longitude ?? undefined,
         start_date: existingTrip.start_date,
@@ -119,11 +121,16 @@ export default function TripFormPage() {
     setValue("longitude", undefined, { shouldDirty: true });
   }
 
+  function handleCountryDetected(country: string) {
+    setValue("country", country, { shouldDirty: true });
+  }
+
   async function onSubmit(values: TripFormValues) {
     const payload: TripPayload = {
       location_name: values.location_name,
       place_area: values.place_area ?? null,
       plot_number: values.plot_number ?? null,
+      country: values.country ?? null,
       start_date: values.start_date,
       end_date: values.end_date,
       latitude: values.latitude ?? null,
@@ -175,6 +182,7 @@ export default function TripFormPage() {
             <input placeholder="Area / region" {...register("place_area")} />
             <input placeholder="Plot / site" {...register("plot_number")} />
           </div>
+          <input placeholder="Country" {...register("country")} />
         </div>
 
         <div className="form-field">
@@ -262,7 +270,12 @@ export default function TripFormPage() {
 
         <div className="form-field">
           <span className="form-field-label">Location</span>
-          <LocationPicker value={locationValue} onChange={handleLocationChange} onClear={handleLocationClear} />
+          <LocationPicker
+            value={locationValue}
+            onChange={handleLocationChange}
+            onClear={handleLocationClear}
+            onCountryDetected={handleCountryDetected}
+          />
         </div>
 
         <div className="form-field">

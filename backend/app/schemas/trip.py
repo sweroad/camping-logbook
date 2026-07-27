@@ -11,6 +11,7 @@ class TripBase(BaseModel):
     location_name: str = Field(min_length=1, max_length=200)
     place_area: str | None = Field(default=None, max_length=200)
     plot_number: str | None = Field(default=None, max_length=50)
+    country: str | None = Field(default=None, max_length=100)
 
     latitude: float | None = None
     longitude: float | None = None
@@ -47,6 +48,7 @@ class TripUpdate(BaseModel):
     location_name: str | None = Field(default=None, min_length=1, max_length=200)
     place_area: str | None = Field(default=None, max_length=200)
     plot_number: str | None = Field(default=None, max_length=50)
+    country: str | None = Field(default=None, max_length=100)
 
     latitude: float | None = None
     longitude: float | None = None

@@ -32,6 +32,7 @@ class Trip(Base):
     location_name: Mapped[str] = mapped_column(String(200), nullable=False)
     place_area: Mapped[str | None] = mapped_column(String(200), nullable=True)
     plot_number: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    country: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
     latitude: Mapped[float | None] = mapped_column(nullable=True)
     longitude: Mapped[float | None] = mapped_column(nullable=True)

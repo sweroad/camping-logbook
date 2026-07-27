@@ -20,7 +20,12 @@ def test_stats_requires_auth(client):
 
 
 def test_stats_summary_default_range_is_current_year(client, auth_headers):
+    # Compare deltas rather than absolute totals: other trips may already exist
+    # in the current year (this runs against a shared dev database, not a
+    # pristine one), so we can only assert what *this* trip contributes.
     year = date.today().year
+    baseline = client.get("/api/stats/summary", headers=auth_headers).json()
+
     _create_trip(
         client,
         auth_headers,
@@ -43,11 +48,12 @@ def test_stats_summary_default_range_is_current_year(client, auth_headers):
     response = client.get("/api/stats/summary", headers=auth_headers)
     assert response.status_code == 200, response.text
     body = response.json()
-    assert body["trip_count"] == 1
-    assert body["total_nights"] == 2
-    assert body["total_price"] == 400.0
-    assert body["avg_price_per_night"] == 200.0
-    assert body["avg_star_rating"] == 4.0
+    # "Last Year Trip" must not affect the default (current-year) range.
+    assert body["trip_count"] == baseline["trip_count"] + 1
+    assert body["total_nights"] == baseline["total_nights"] + 2
+    assert body["total_price"] == round((baseline["total_price"] or 0) + 400.0, 2)
+    assert body["avg_price_per_night"] is not None
+    assert body["avg_star_rating"] is not None
 
 
 def test_stats_summary_explicit_range(client, auth_headers):

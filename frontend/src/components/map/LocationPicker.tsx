@@ -9,6 +9,7 @@ interface LocationPickerProps {
   value: LatLngLiteral | null;
   onChange: (value: LatLngLiteral) => void;
   onClear: () => void;
+  onCountryDetected?: (country: string) => void;
 }
 
 const DEFAULT_CENTER: LatLngLiteral = { lat: 59.3293, lng: 18.0686 };
@@ -32,7 +33,7 @@ function RecenterOnChange({ value }: { value: LatLngLiteral | null }) {
   return null;
 }
 
-export default function LocationPicker({ value, onChange, onClear }: LocationPickerProps) {
+export default function LocationPicker({ value, onChange, onClear, onCountryDetected }: LocationPickerProps) {
   const [geoError, setGeoError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<GeocodeResult[]>([]);
@@ -80,6 +81,9 @@ export default function LocationPicker({ value, onChange, onClear }: LocationPic
 
   function handleSelectResult(result: GeocodeResult) {
     onChange({ lat: parseFloat(result.lat), lng: parseFloat(result.lon) });
+    if (result.address?.country) {
+      onCountryDetected?.(result.address.country);
+    }
     setQuery(result.display_name);
     setResults([]);
   }

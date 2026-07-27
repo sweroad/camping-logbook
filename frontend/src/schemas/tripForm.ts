@@ -7,6 +7,7 @@ export const tripFormSchema = z
     location_name: z.string().min(1, "Required").max(200),
     place_area: z.preprocess(emptyToUndefined, z.string().max(200).optional()),
     plot_number: z.preprocess(emptyToUndefined, z.string().max(50).optional()),
+    country: z.preprocess(emptyToUndefined, z.string().max(100).optional()),
     latitude: z.preprocess(emptyToUndefined, z.coerce.number().optional()),
     longitude: z.preprocess(emptyToUndefined, z.coerce.number().optional()),
     start_date: z.string().min(1, "Required"),
