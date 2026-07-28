@@ -35,7 +35,6 @@ export default function PhotoUploader({ tripId }: PhotoUploaderProps) {
           ref={inputRef}
           type="file"
           accept="image/*"
-          capture="environment"
           multiple
           disabled={isUploading}
           onChange={(e) => handleFiles(e.target.files)}
