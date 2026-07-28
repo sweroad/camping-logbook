@@ -519,6 +519,13 @@ button[type="submit"]:disabled { opacity: .5; cursor: default; }
 .stats-chart-value { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 3px; font: 600 10.5px/1 var(--font-ui); color: var(--ink-45); white-space: nowrap; }
 .stats-chart-label { margin-top: 6px; font: 500 10.5px/1 var(--font-ui); color: var(--ink-38); }
 
+.staytype-chart { display: flex; flex-direction: column; gap: 14px; margin-top: 16px; }
+.staytype-row { display: grid; grid-template-columns: 84px 1fr 28px; align-items: center; gap: 10px; }
+.staytype-row-label { font: 600 12px/1.2 var(--font-ui); color: var(--ink-70); }
+.staytype-row-track { height: 16px; background: var(--sand); border-radius: 4px; overflow: hidden; }
+.staytype-row-bar { height: 100%; min-width: 2px; background: var(--pine); border-radius: 4px; }
+.staytype-row-value { text-align: right; font: 600 12.5px/1 var(--font-ui); color: var(--ink-70); }
+
 .top-rated { margin: 14px 0 0; padding: 6px 0; }
 .top-rated-label { display: block; padding: 8px 2px; font: 600 9.5px/1 var(--font-ui); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-45); }
 .top-rated-row {

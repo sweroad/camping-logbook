@@ -2,8 +2,10 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import ExportButton from "../components/stats/ExportButton";
 import MonthlyNightsChart from "../components/stats/MonthlyNightsChart";
+import StayTypeChart from "../components/stats/StayTypeChart";
 import { useStatsByMonth, useStatsSummary } from "../hooks/useStats";
 import { useTrips } from "../hooks/useTrips";
+import { STAY_TYPES } from "../utils/stayType";
 
 function addDays(dateStr: string, days: number): string {
   const d = new Date(`${dateStr}T00:00:00`);
@@ -39,6 +41,22 @@ export default function StatsPage() {
   const pricedNights = pricedTrips.reduce((sum, t) => sum + t.nights, 0);
   const ratedTrips = trips.filter((t) => t.star_rating !== null);
   const topRated = [...ratedTrips].sort((a, b) => (b.star_rating ?? 0) - (a.star_rating ?? 0)).slice(0, 3);
+
+  const stayTypeData = useMemo(() => {
+    const nightsByType = new Map<string, number>();
+    let unspecifiedNights = 0;
+    for (const trip of trips) {
+      if (trip.stay_type) {
+        nightsByType.set(trip.stay_type, (nightsByType.get(trip.stay_type) ?? 0) + trip.nights);
+      } else {
+        unspecifiedNights += trip.nights;
+      }
+    }
+    return [
+      ...STAY_TYPES.map((type) => ({ label: type.label, nights: nightsByType.get(type.value) ?? 0 })),
+      { label: "Not specified", nights: unspecifiedNights },
+    ];
+  }, [trips]);
 
   const periodLabel = year === "all" ? "all-time" : `in ${year}`;
 
@@ -113,6 +131,13 @@ export default function StatsPage() {
         <div className="stats-chart-card">
           <span className="stats-chart-card-label">Nights per month</span>
           <MonthlyNightsChart months={byMonth.months} />
+        </div>
+      )}
+
+      {trips.length > 0 && (
+        <div className="stats-chart-card">
+          <span className="stats-chart-card-label">Nights by type</span>
+          <StayTypeChart data={stayTypeData} />
         </div>
       )}
 
