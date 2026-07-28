@@ -90,6 +90,48 @@ def test_create_trip_with_country(client, auth_headers):
     assert response.json()["country"] == "Sweden"
 
 
+def test_create_trip_with_stay_type(client, auth_headers):
+    payload = {
+        "location_name": "Fricamping, Holkekärrnäs skans",
+        "stay_type": "fricamping",
+        "start_date": "2026-07-13",
+        "end_date": "2026-07-14",
+        "price_input_mode": "none",
+    }
+    response = client.post("/api/trips", json=payload, headers=auth_headers)
+    assert response.status_code == 201, response.text
+    assert response.json()["stay_type"] == "fricamping"
+
+
+def test_create_trip_rejects_invalid_stay_type(client, auth_headers):
+    payload = {
+        "location_name": "Bad Stay Type Camp",
+        "stay_type": "glamping",
+        "start_date": "2026-01-01",
+        "end_date": "2026-01-02",
+        "price_input_mode": "none",
+    }
+    response = client.post("/api/trips", json=payload, headers=auth_headers)
+    assert response.status_code == 422
+
+
+def test_update_trip_stay_type(client, auth_headers):
+    payload = {
+        "location_name": "Stay Type Update Camp",
+        "start_date": "2026-03-01",
+        "end_date": "2026-03-02",
+        "price_input_mode": "none",
+    }
+    created = client.post("/api/trips", json=payload, headers=auth_headers).json()
+    assert created["stay_type"] is None
+
+    response = client.patch(
+        f"/api/trips/{created['id']}", json={"stay_type": "stallplats"}, headers=auth_headers
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["stay_type"] == "stallplats"
+
+
 def test_create_trip_without_country_defaults_to_null(client, auth_headers):
     payload = {
         "location_name": "No Country Camp",

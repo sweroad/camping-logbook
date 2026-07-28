@@ -6,12 +6,14 @@ import LocationPicker from "../components/map/LocationPicker";
 import { useCreateTrip, useDeleteTrip, useTrip, useUpdateTrip } from "../hooks/useTrips";
 import { tripFormSchema, type TripFormValues } from "../schemas/tripForm";
 import type { PriceInputMode, TripPayload } from "../types/trip";
+import { STAY_TYPES } from "../utils/stayType";
 
 const defaultValues: TripFormValues = {
   location_name: "",
   place_area: undefined,
   plot_number: undefined,
   country: undefined,
+  stay_type: undefined,
   latitude: undefined,
   longitude: undefined,
   start_date: "",
@@ -65,6 +67,7 @@ export default function TripFormPage() {
         place_area: existingTrip.place_area ?? undefined,
         plot_number: existingTrip.plot_number ?? undefined,
         country: existingTrip.country ?? undefined,
+        stay_type: existingTrip.stay_type ?? undefined,
         latitude: existingTrip.latitude ?? undefined,
         longitude: existingTrip.longitude ?? undefined,
         start_date: existingTrip.start_date,
@@ -80,6 +83,7 @@ export default function TripFormPage() {
   }, [existingTrip, reset]);
 
   const priceMode = watch("price_input_mode");
+  const stayType = watch("stay_type");
   const currency = watch("currency");
   const startDate = watch("start_date");
   const endDate = watch("end_date");
@@ -131,6 +135,7 @@ export default function TripFormPage() {
       place_area: values.place_area ?? null,
       plot_number: values.plot_number ?? null,
       country: values.country ?? null,
+      stay_type: values.stay_type ?? null,
       start_date: values.start_date,
       end_date: values.end_date,
       latitude: values.latitude ?? null,
@@ -183,6 +188,24 @@ export default function TripFormPage() {
             <input placeholder="Plot / site" {...register("plot_number")} />
           </div>
           <input placeholder="Country" {...register("country")} />
+        </div>
+
+        <div className="form-field">
+          <span className="form-field-label">Type</span>
+          <div className="chip-row chip-row--seg">
+            {STAY_TYPES.map((type) => (
+              <button
+                key={type.value}
+                type="button"
+                className={stayType === type.value ? "chip chip--seg active" : "chip chip--seg"}
+                onClick={() =>
+                  setValue("stay_type", stayType === type.value ? undefined : type.value, { shouldDirty: true })
+                }
+              >
+                {type.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="form-field">

@@ -6,6 +6,7 @@ import PhotoLightbox from "../components/photo/PhotoLightbox";
 import PhotoUploader from "../components/photo/PhotoUploader";
 import { useTrip } from "../hooks/useTrips";
 import type { Trip } from "../types/trip";
+import { formatStayType } from "../utils/stayType";
 
 function formatPriceValue(trip: Pick<Trip, "price_total" | "currency">): string {
   if (trip.price_total === null) return "Missing";
@@ -74,7 +75,10 @@ export default function TripDetailPage() {
       <div className="trip-detail-body">
         <h1>{trip.location_name}</h1>
         <p className="trip-detail-area">{formatAreaLine(trip)}</p>
-        {trip.star_rating && <p className="trip-detail-stars">{"★".repeat(trip.star_rating)}</p>}
+        <div className="trip-detail-meta">
+          {trip.star_rating && <span className="trip-detail-stars">{"★".repeat(trip.star_rating)}</span>}
+          {trip.stay_type && <span className="badge badge--staytype">{formatStayType(trip.stay_type)}</span>}
+        </div>
 
         <div className="trip-fact-grid">
           {facts.map((fact) => (

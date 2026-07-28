@@ -46,6 +46,7 @@ def test_export_trips_sheet_contents(client, auth_headers):
         location_name="Trosa Havsbad och Camping",
         plot_number="420",
         country="Sweden",
+        stay_type="camping",
         start_date="2025-08-06",
         end_date="2025-08-08",
         price_per_night_input=495,
@@ -66,6 +67,7 @@ def test_export_trips_sheet_contents(client, auth_headers):
         "place_area",
         "plot_number",
         "country",
+        "stay_type",
         "latitude",
         "longitude",
         "start_date",
@@ -95,6 +97,7 @@ def test_export_trips_sheet_contents(client, auth_headers):
     assert by_header["location_name"] == "Trosa Havsbad och Camping"
     assert by_header["plot_number"] == "420"
     assert by_header["country"] == "Sweden"
+    assert by_header["stay_type"] == "camping"
     assert by_header["nights"] == 2
     assert by_header["price_total_sek"] == 990.0
     assert by_header["price_per_night_input_sek"] == 495.0

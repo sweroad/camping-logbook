@@ -20,6 +20,12 @@ class PriceInputMode(str, enum.Enum):
     none = "none"
 
 
+class StayType(str, enum.Enum):
+    camping = "camping"
+    stallplats = "stallplats"
+    fricamping = "fricamping"
+
+
 class Trip(Base):
     __tablename__ = "trips"
 
@@ -33,6 +39,7 @@ class Trip(Base):
     place_area: Mapped[str | None] = mapped_column(String(200), nullable=True)
     plot_number: Mapped[str | None] = mapped_column(String(50), nullable=True)
     country: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    stay_type: Mapped[StayType | None] = mapped_column(SAEnum(StayType, name="stay_type"), nullable=True)
 
     latitude: Mapped[float | None] = mapped_column(nullable=True)
     longitude: Mapped[float | None] = mapped_column(nullable=True)

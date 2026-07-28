@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTrips } from "../hooks/useTrips";
 import type { Trip } from "../types/trip";
+import { formatStayType } from "../utils/stayType";
 
 function formatPriceLabel(trip: Pick<Trip, "price_total" | "currency">): string {
   if (trip.price_total === null) return "Price missing";
@@ -52,6 +53,8 @@ export default function TripListPage() {
           !q ||
           t.location_name.toLowerCase().includes(q) ||
           (t.place_area ?? "").toLowerCase().includes(q) ||
+          (t.country ?? "").toLowerCase().includes(q) ||
+          (formatStayType(t.stay_type) ?? "").toLowerCase().includes(q) ||
           (t.notes ?? "").toLowerCase().includes(q),
       )
       .sort((a, b) => b.start_date.localeCompare(a.start_date));
@@ -149,6 +152,9 @@ export default function TripListPage() {
                         <div className="trip-badges">
                           <span className="badge badge--nights">{nightsLabel(trip.nights)}</span>
                           <span className="badge badge--price">{formatPriceLabel(trip)}</span>
+                          {trip.stay_type && (
+                            <span className="badge badge--staytype">{formatStayType(trip.stay_type)}</span>
+                          )}
                           {trip.star_rating && (
                             <span className="badge badge--stars">{"★".repeat(trip.star_rating)}</span>
                           )}

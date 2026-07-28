@@ -3,7 +3,7 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, Field, model_validator
 
-from app.models.trip import PriceInputMode
+from app.models.trip import PriceInputMode, StayType
 from app.schemas.photo import PhotoOut
 
 
@@ -12,6 +12,7 @@ class TripBase(BaseModel):
     place_area: str | None = Field(default=None, max_length=200)
     plot_number: str | None = Field(default=None, max_length=50)
     country: str | None = Field(default=None, max_length=100)
+    stay_type: StayType | None = None
 
     latitude: float | None = None
     longitude: float | None = None
@@ -49,6 +50,7 @@ class TripUpdate(BaseModel):
     place_area: str | None = Field(default=None, max_length=200)
     plot_number: str | None = Field(default=None, max_length=50)
     country: str | None = Field(default=None, max_length=100)
+    stay_type: StayType | None = None
 
     latitude: float | None = None
     longitude: float | None = None

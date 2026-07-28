@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.models.campsite import Campsite
 from app.models.trip import Trip
 
-EXPORT_FORMAT_VERSION = "1.1"
+EXPORT_FORMAT_VERSION = "1.2"
 HEADER_FONT = Font(bold=True)
 
 TRIPS_HEADERS = [
@@ -20,6 +20,7 @@ TRIPS_HEADERS = [
     "place_area",
     "plot_number",
     "country",
+    "stay_type",
     "latitude",
     "longitude",
     "start_date",
@@ -46,6 +47,7 @@ README_ROWS = [
     ("Trips", "place_area", "text", "yes", "Broader area/region, if recorded"),
     ("Trips", "plot_number", "text", "yes", "Plot/site identifier as free text (not always numeric)"),
     ("Trips", "country", "text", "yes", "Country the trip took place in, free text"),
+    ("Trips", "stay_type", "text", "yes", "One of: camping, stallplats, fricamping"),
     ("Trips", "latitude", "number", "yes", "Decimal degrees, WGS84"),
     ("Trips", "longitude", "number", "yes", "Decimal degrees, WGS84"),
     ("Trips", "start_date", "date", "no", "First night of the stay"),
@@ -121,6 +123,7 @@ def _build_trips_sheet(ws: Worksheet, trips: list[Trip]) -> None:
                 trip.place_area,
                 trip.plot_number,
                 trip.country,
+                trip.stay_type.value if trip.stay_type is not None else None,
                 trip.latitude,
                 trip.longitude,
                 trip.start_date,

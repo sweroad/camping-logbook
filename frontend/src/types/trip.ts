@@ -1,4 +1,5 @@
 export type PriceInputMode = "total" | "per_night" | "none";
+export type StayType = "camping" | "stallplats" | "fricamping";
 
 export interface Photo {
   id: string;
@@ -18,6 +19,7 @@ export interface Trip {
   place_area: string | null;
   plot_number: string | null;
   country: string | null;
+  stay_type: StayType | null;
   latitude: number | null;
   longitude: number | null;
   start_date: string;
@@ -44,6 +46,7 @@ export interface TripPayload {
   place_area?: string | null;
   plot_number?: string | null;
   country?: string | null;
+  stay_type?: StayType | null;
   latitude?: number | null;
   longitude?: number | null;
   start_date: string;
