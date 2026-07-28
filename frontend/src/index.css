@@ -39,12 +39,12 @@
    handles by starting zoomed out and letting you drag sideways until a
    pinch resets it. Clipping horizontal overflow here is the standard fix —
    it does not disable pinch-zoom, only the accidental sideways pan. */
-html { height: 100dvh; overflow: hidden; }
+html { overflow-x: hidden; }
 
 body {
   margin: 0;
-  height: 100dvh;
-  overflow: hidden;
+  min-height: 100dvh;
+  overflow-x: hidden;
   background: var(--paper);
   color: var(--ink);
   font-family: var(--font-ui);
@@ -54,12 +54,7 @@ body {
   text-wrap: pretty;
 }
 
-/* The app shell is locked to one screen's height so the header and bottom
-   nav stay fixed in place; .app-content is the only element that scrolls.
-   Without this, a page taller than the viewport grows the whole document,
-   pushing the "sticky" bottom nav below the fold until you scroll past
-   everything else to reach it. */
-#root { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+#root { display: flex; flex-direction: column; min-height: 100dvh; overflow-x: hidden; }
 
 input, select, textarea, button { font: inherit; color: inherit; }
 a { color: var(--rust-deep); text-decoration: none; }
@@ -71,7 +66,11 @@ h2 { font: 400 22px/1.2 var(--font-display); margin: 24px 0 10px; }
 /* --------------------------------------------------------------------------
    App shell
    -------------------------------------------------------------------------- */
-.app-layout { display: flex; flex-direction: column; height: 100dvh; background: var(--paper); }
+/* Fixed + inset:0 (not height:100dvh) so the shell always fills the true
+   visible viewport, matching .login-page/.trip-form-page below — dvh can
+   under-report the real height in an iOS home-screen install, leaving a
+   blank gap under the bottom nav. Only .app-content scrolls internally. */
+.app-layout { position: fixed; inset: 0; display: flex; flex-direction: column; background: var(--paper); }
 
 .app-header {
   display: flex; align-items: center; justify-content: space-between;
