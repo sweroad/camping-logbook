@@ -478,7 +478,6 @@ button[type="submit"]:disabled { opacity: .5; cursor: default; }
 .lightbox-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(245,241,232,.3); }
 .lightbox-dot.active { background: var(--paper); }
 .photo-uploader { margin-top: 16px; }
-.photo-uploader-hint { margin-top: 8px; font: 500 11.5px/1.4 var(--font-ui); color: var(--ink-45); }
 .photo-uploader-label {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 12px 18px; min-height: 44px;

@@ -102,9 +102,6 @@ export default function TripDetailPage() {
             <PhotoUploader tripId={trip.id} />
           </div>
           <PhotoGallery tripId={trip.id} photos={trip.photos} onOpen={setLightboxIndex} />
-          <p className="photo-uploader-hint">
-            On Android, you can also share photos straight from your Gallery or Camera app into Camping Logbook.
-          </p>
         </div>
 
         <p className="trip-audit">
