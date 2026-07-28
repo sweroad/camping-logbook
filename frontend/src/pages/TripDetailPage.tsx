@@ -8,8 +8,8 @@ import { useTrip } from "../hooks/useTrips";
 import type { Trip } from "../types/trip";
 import { formatStayType } from "../utils/stayType";
 
-function formatPriceValue(trip: Pick<Trip, "price_total" | "currency">): string {
-  if (trip.price_total === null) return "Missing";
+function formatPriceValue(trip: Pick<Trip, "price_total" | "currency" | "stay_type">): string {
+  if (trip.price_total === null) return trip.stay_type === "fricamping" ? "Free" : "Missing";
   if (trip.price_total === 0) return "Free";
   return `${trip.price_total} ${trip.currency}`;
 }

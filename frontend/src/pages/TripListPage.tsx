@@ -4,8 +4,8 @@ import { useTrips } from "../hooks/useTrips";
 import type { Trip } from "../types/trip";
 import { formatStayType } from "../utils/stayType";
 
-function formatPriceLabel(trip: Pick<Trip, "price_total" | "currency">): string {
-  if (trip.price_total === null) return "Price missing";
+function formatPriceLabel(trip: Pick<Trip, "price_total" | "currency" | "stay_type">): string {
+  if (trip.price_total === null) return trip.stay_type === "fricamping" ? "Free" : "Price missing";
   if (trip.price_total === 0) return "Free";
   return `${trip.price_total} ${trip.currency}`;
 }
