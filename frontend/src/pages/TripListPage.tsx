@@ -29,6 +29,17 @@ function nightsLabel(nights: number): string {
   return `${nights} ${nights === 1 ? "night" : "nights"}`;
 }
 
+function countLogicalTrips(trips: Trip[]): number {
+  const sorted = [...trips].sort((a, b) => a.start_date.localeCompare(b.start_date));
+  let count = 0;
+  let prevEndDate: string | null = null;
+  for (const trip of sorted) {
+    if (trip.start_date !== prevEndDate) count += 1;
+    prevEndDate = trip.end_date;
+  }
+  return count;
+}
+
 export default function TripListPage() {
   const [query, setQuery] = useState("");
   const [year, setYear] = useState("all");
@@ -81,12 +92,13 @@ export default function TripListPage() {
   }, [filtered]);
 
   const totalNights = filtered.reduce((sum, t) => sum + t.nights, 0);
+  const tripCount = useMemo(() => countLogicalTrips(filtered), [filtered]);
 
   return (
     <div className="trip-list-page">
       <h1>Trips</h1>
       <p className="trip-list-subtitle">
-        {filtered.length} {filtered.length === 1 ? "trip" : "trips"} · {nightsLabel(totalNights)}
+        {tripCount} {tripCount === 1 ? "trip" : "trips"} · {nightsLabel(totalNights)}
         {year === "all" ? " across all years" : ` in ${year}`}
       </p>
 
