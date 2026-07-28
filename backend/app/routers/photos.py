@@ -29,13 +29,13 @@ async def upload_photo(
     current_user: User = Depends(get_current_user),
 ):
     _get_trip_or_404(db, trip_id)
-    relative_path, size = await photo_service.save_photo_file(file)
+    relative_path, size, content_type = await photo_service.save_photo_file(file)
 
     photo = Photo(
         trip_id=trip_id,
         file_path=relative_path,
         original_filename=file.filename,
-        content_type=file.content_type,
+        content_type=content_type,
         file_size_bytes=size,
         uploaded_by_user_id=current_user.id,
     )

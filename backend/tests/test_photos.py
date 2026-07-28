@@ -49,10 +49,26 @@ def test_upload_photo_success(client, auth_headers):
     response = _upload(client, auth_headers, trip["id"])
     assert response.status_code == 201, response.text
     body = response.json()
-    assert body["content_type"] == "image/png"
-    assert body["file_size_bytes"] == len(TINY_PNG)
+    # Uploads are always re-encoded to JPEG (compressed for reference viewing,
+    # not archival storage -- the original stays on the user's phone), so the
+    # stored content type/size never matches the raw upload byte-for-byte.
+    assert body["content_type"] == "image/jpeg"
+    assert body["file_size_bytes"] > 0
     assert body["original_filename"] == "test.png"
     assert body["trip_id"] == trip["id"]
+
+
+def test_upload_photo_rejects_corrupt_image_data(client, auth_headers):
+    trip = _create_trip(client, auth_headers)
+    response = _upload(
+        client,
+        auth_headers,
+        trip["id"],
+        filename="corrupt.png",
+        content_type="image/png",
+        content=b"\x89PNG\r\n\x1a\nthis is not a real png stream",
+    )
+    assert response.status_code == 415
 
 
 def test_upload_photo_rejects_non_image(client, auth_headers):

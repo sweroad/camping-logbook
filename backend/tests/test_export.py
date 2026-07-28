@@ -1,8 +1,13 @@
+import base64
 import io
 
 from openpyxl import load_workbook
 
 from app.models.campsite import Campsite
+
+TINY_PNG = base64.b64decode(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
+)
 
 
 def _create_trip(client, auth_headers, **overrides):
@@ -104,7 +109,7 @@ def test_export_includes_photo_metadata_not_photo_bytes(client, auth_headers):
     trip = _create_trip(client, auth_headers, location_name="Photo Export Camp")
     client.post(
         f"/api/trips/{trip['id']}/photos",
-        files={"file": ("beach.png", io.BytesIO(b"\x89PNG\r\n\x1a\nrest-is-not-a-real-png"), "image/png")},
+        files={"file": ("beach.png", io.BytesIO(TINY_PNG), "image/png")},
         headers=auth_headers,
     )
 
