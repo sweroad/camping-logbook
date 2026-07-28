@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useTrips } from "../hooks/useTrips";
 import type { Trip } from "../types/trip";
 import { formatStayType } from "../utils/stayType";
+import { countLogicalTrips } from "../utils/tripCount";
 
 function formatPriceLabel(trip: Pick<Trip, "price_total" | "currency" | "stay_type">): string {
   if (trip.price_total === null) return trip.stay_type === "fricamping" ? "Free" : "Price missing";
@@ -29,16 +30,6 @@ function nightsLabel(nights: number): string {
   return `${nights} ${nights === 1 ? "night" : "nights"}`;
 }
 
-function countLogicalTrips(trips: Trip[]): number {
-  const sorted = [...trips].sort((a, b) => a.start_date.localeCompare(b.start_date));
-  let count = 0;
-  let prevEndDate: string | null = null;
-  for (const trip of sorted) {
-    if (trip.start_date !== prevEndDate) count += 1;
-    prevEndDate = trip.end_date;
-  }
-  return count;
-}
 
 export default function TripListPage() {
   const [query, setQuery] = useState("");

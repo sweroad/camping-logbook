@@ -6,6 +6,7 @@ import StayTypeChart from "../components/stats/StayTypeChart";
 import { useStatsByMonth, useStatsSummary } from "../hooks/useStats";
 import { useTrips } from "../hooks/useTrips";
 import { STAY_TYPES } from "../utils/stayType";
+import { countLogicalTrips } from "../utils/tripCount";
 
 function addDays(dateStr: string, days: number): string {
   const d = new Date(`${dateStr}T00:00:00`);
@@ -36,6 +37,7 @@ export default function StatsPage() {
   const { data: rangedTrips } = useTrips({ ...range, limit: 200 });
 
   const trips = rangedTrips?.items ?? [];
+  const tripCount = useMemo(() => countLogicalTrips(trips), [trips]);
   const placeCount = new Set(trips.map((t) => t.location_name)).size;
   const pricedTrips = trips.filter((t) => t.price_total !== null);
   const pricedNights = pricedTrips.reduce((sum, t) => sum + t.nights, 0);
@@ -114,7 +116,9 @@ export default function StatsPage() {
             <div className="stat-tile">
               <span className="stat-tile-label">Places</span>
               <span className="stat-tile-value">{placeCount}</span>
-              <span className="stat-tile-sub">{trips.length} stays</span>
+              <span className="stat-tile-sub">
+                {tripCount} {tripCount === 1 ? "trip" : "trips"}
+              </span>
             </div>
             <div className="stat-tile">
               <span className="stat-tile-label">Avg rating</span>
