@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import TripHeroMap from "../components/map/TripHeroMap";
 import PhotoGallery from "../components/photo/PhotoGallery";
+import PhotoLightbox from "../components/photo/PhotoLightbox";
 import PhotoUploader from "../components/photo/PhotoUploader";
 import { useTrip } from "../hooks/useTrips";
 import type { Trip } from "../types/trip";
@@ -33,6 +35,7 @@ export default function TripDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: trip, isLoading, isError } = useTrip(id);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   if (isLoading) return <p>Loading...</p>;
   if (isError || !trip) {
@@ -94,7 +97,7 @@ export default function TripDetailPage() {
             <span className="trip-photos-label">Photos</span>
             <PhotoUploader tripId={trip.id} />
           </div>
-          <PhotoGallery tripId={trip.id} photos={trip.photos} />
+          <PhotoGallery tripId={trip.id} photos={trip.photos} onOpen={setLightboxIndex} />
           <p className="photo-uploader-hint">
             On Android, you can also share photos straight from your Gallery or Camera app into Camping Logbook.
           </p>
@@ -104,6 +107,10 @@ export default function TripDetailPage() {
           Created {formatDate(trip.created_at)} · last edited {formatDate(trip.updated_at)}
         </p>
       </div>
+
+      {lightboxIndex !== null && (
+        <PhotoLightbox photos={trip.photos} initialIndex={lightboxIndex} onClose={() => setLightboxIndex(null)} />
+      )}
     </div>
   );
 }
