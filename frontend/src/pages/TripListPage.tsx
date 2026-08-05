@@ -30,6 +30,12 @@ function nightsLabel(nights: number): string {
   return `${nights} ${nights === 1 ? "night" : "nights"}`;
 }
 
+const SORT_ORDER_KEY = "camping_logbook_timeline_sort_order";
+
+function loadStoredSortOrder(): "asc" | "desc" {
+  return localStorage.getItem(SORT_ORDER_KEY) === "asc" ? "asc" : "desc";
+}
+
 const SortIcon = ({ order }: { order: "asc" | "desc" }) => (
   <svg
     width="16"
@@ -49,7 +55,7 @@ const SortIcon = ({ order }: { order: "asc" | "desc" }) => (
 export default function TripListPage() {
   const [query, setQuery] = useState("");
   const [year, setYear] = useState("all");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">(loadStoredSortOrder);
 
   const { data, isLoading, isError } = useTrips({ limit: 200 });
   const trips = useMemo(() => data?.items ?? [], [data]);
@@ -121,7 +127,13 @@ export default function TripListPage() {
         <button
           type="button"
           className="sort-toggle"
-          onClick={() => setSortOrder((o) => (o === "desc" ? "asc" : "desc"))}
+          onClick={() =>
+            setSortOrder((o) => {
+              const next = o === "desc" ? "asc" : "desc";
+              localStorage.setItem(SORT_ORDER_KEY, next);
+              return next;
+            })
+          }
           aria-label={sortOrder === "desc" ? "Sorted newest first" : "Sorted oldest first"}
           title={sortOrder === "desc" ? "Newest first" : "Oldest first"}
         >
