@@ -122,11 +122,16 @@ export default function TripDetailPage() {
               <code>lon</code>). Extra columns are ignored.
             </p>
             <p>Run this in Grafana against your TeslaMate datasource, then use "Inspect → Data → Download CSV":</p>
-            <pre>{`SELECT date, latitude, longitude
+            <pre>{`SELECT date, latitude::text AS latitude, longitude::text AS longitude
 FROM positions
 WHERE car_id = $car_id
   AND date BETWEEN '${trip.start_date}' AND '${addDays(trip.end_date, 1)}'
 ORDER BY date`}</pre>
+            <p>
+              The <code>::text</code> cast matters — without it, Grafana may apply its default numeric display
+              rounding (e.g. to 1 decimal place) before exporting, which turns the route into a coarse,
+              staircase-shaped line instead of following the actual road.
+            </p>
           </details>
         </div>
 
