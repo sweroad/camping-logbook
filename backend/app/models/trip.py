@@ -43,7 +43,9 @@ class Trip(Base):
 
     latitude: Mapped[float | None] = mapped_column(nullable=True)
     longitude: Mapped[float | None] = mapped_column(nullable=True)
-    route_points: Mapped[list[list[list[float]]] | None] = mapped_column(JSONB, nullable=True)
+    route_points: Mapped[list[list[list[float]]] | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
 
     start_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     end_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
