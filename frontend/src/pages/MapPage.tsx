@@ -12,11 +12,13 @@ export default function MapPage() {
 
   const pins = useMemo(
     () =>
-      (data?.items ?? []).flatMap((trip) =>
-        trip.latitude !== null && trip.longitude !== null
-          ? [{ ...trip, latitude: trip.latitude, longitude: trip.longitude }]
-          : [],
-      ),
+      (data?.items ?? [])
+        .flatMap((trip) =>
+          trip.latitude !== null && trip.longitude !== null
+            ? [{ ...trip, latitude: trip.latitude, longitude: trip.longitude }]
+            : [],
+        )
+        .sort((a, b) => a.start_date.localeCompare(b.start_date)),
     [data],
   );
 
