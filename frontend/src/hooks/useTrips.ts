@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createTrip, deleteTrip, getTrip, listTrips, updateTrip } from "../api/trips";
+import { createTrip, deleteRoute, deleteTrip, getTrip, listTrips, updateTrip, uploadRoute } from "../api/trips";
 import type { TripFilters, TripPayload } from "../types/trip";
 
 export function useTrips(filters: TripFilters) {
@@ -41,6 +41,26 @@ export function useDeleteTrip() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => deleteTrip(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["trips"] });
+    },
+  });
+}
+
+export function useUploadRoute(tripId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => uploadRoute(tripId, file),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["trips"] });
+    },
+  });
+}
+
+export function useDeleteRoute(tripId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => deleteRoute(tripId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["trips"] });
     },

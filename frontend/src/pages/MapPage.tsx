@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { MapContainer, Marker } from "react-leaflet";
+import { MapContainer, Marker, Polyline } from "react-leaflet";
 import VlTileLayer from "../components/map/VlTileLayer";
 import { createPinIcon } from "../components/map/pinIcon";
 import { useTrips } from "../hooks/useTrips";
@@ -35,6 +35,15 @@ export default function MapPage() {
     <div className="map-page">
       <MapContainer center={center} zoom={pins.length > 0 ? 6 : 4} zoomControl={false} className="trips-map">
         <VlTileLayer />
+        {pins.map((trip) =>
+          trip.route_points && trip.route_points.length > 0 ? (
+            <Polyline
+              key={`${trip.id}-route`}
+              positions={trip.route_points}
+              pathOptions={{ color: "#C0522F", weight: 2, opacity: 0.7 }}
+            />
+          ) : null,
+        )}
         {pins.map((trip, index) => (
           <Marker
             key={trip.id}

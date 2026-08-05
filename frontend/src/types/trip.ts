@@ -1,5 +1,6 @@
 export type PriceInputMode = "total" | "per_night" | "none";
 export type StayType = "camping" | "stallplats" | "fricamping";
+export type RouteSegment = Array<[number, number]>;
 
 export interface Photo {
   id: string;
@@ -34,6 +35,7 @@ export interface Trip {
   created_at: string;
   updated_at: string;
   photos: Photo[];
+  route_points: RouteSegment[] | null;
 }
 
 export interface TripListResponse {

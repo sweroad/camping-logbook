@@ -76,6 +76,7 @@ class TripOut(TripBase):
     created_at: datetime
     updated_at: datetime
     photos: list[PhotoOut] = []
+    route_points: list[list[list[float]]] | None = None
 
     model_config = {"from_attributes": True}
 

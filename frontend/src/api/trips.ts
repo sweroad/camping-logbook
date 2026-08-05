@@ -27,3 +27,13 @@ export function updateTrip(id: string, payload: Partial<TripPayload>): Promise<T
 export function deleteTrip(id: string): Promise<void> {
   return apiFetch<void>(`/trips/${id}`, { method: "DELETE" });
 }
+
+export function uploadRoute(tripId: string, file: File): Promise<Trip> {
+  const formData = new FormData();
+  formData.append("file", file);
+  return apiFetch<Trip>(`/trips/${tripId}/route`, { method: "POST", body: formData });
+}
+
+export function deleteRoute(tripId: string): Promise<Trip> {
+  return apiFetch<Trip>(`/trips/${tripId}/route`, { method: "DELETE" });
+}

@@ -1,7 +1,7 @@
 import uuid
 from datetime import date
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, status
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
@@ -10,7 +10,7 @@ from app.deps import get_current_user
 from app.models.trip import Trip
 from app.models.user import User
 from app.schemas.trip import TripCreate, TripListResponse, TripOut, TripUpdate
-from app.services import photo_service, trip_service
+from app.services import photo_service, route_service, trip_service
 
 router = APIRouter(prefix="/api/trips", tags=["trips"])
 
@@ -100,3 +100,30 @@ def delete_trip(
         photo_service.delete_photo_file(photo.file_path)
     db.delete(trip)
     db.commit()
+
+
+@router.post("/{trip_id}/route", response_model=TripOut)
+async def upload_route(
+    trip_id: uuid.UUID,
+    file: UploadFile,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    trip = _get_trip_or_404(db, trip_id)
+    trip.route_points = await route_service.save_route(file)
+    db.commit()
+    db.refresh(trip)
+    return trip
+
+
+@router.delete("/{trip_id}/route", response_model=TripOut)
+def delete_route(
+    trip_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    trip = _get_trip_or_404(db, trip_id)
+    trip.route_points = None
+    db.commit()
+    db.refresh(trip)
+    return trip

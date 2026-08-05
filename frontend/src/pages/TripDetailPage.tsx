@@ -4,6 +4,7 @@ import TripHeroMap from "../components/map/TripHeroMap";
 import PhotoGallery from "../components/photo/PhotoGallery";
 import PhotoLightbox from "../components/photo/PhotoLightbox";
 import PhotoUploader from "../components/photo/PhotoUploader";
+import RouteUploader from "../components/route/RouteUploader";
 import { useTrip } from "../hooks/useTrips";
 import type { Trip } from "../types/trip";
 import { formatStayType } from "../utils/stayType";
@@ -30,6 +31,12 @@ function formatAreaLine(trip: Pick<Trip, "place_area" | "plot_number" | "country
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString();
+}
+
+function addDays(dateStr: string, days: number): string {
+  const d = new Date(`${dateStr}T00:00:00`);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
 }
 
 export default function TripDetailPage() {
@@ -63,7 +70,7 @@ export default function TripDetailPage() {
   return (
     <div className="trip-detail-page">
       <div className="trip-hero">
-        <TripHeroMap latitude={trip.latitude} longitude={trip.longitude} />
+        <TripHeroMap latitude={trip.latitude} longitude={trip.longitude} routeSegments={trip.route_points} />
         <button type="button" className="trip-hero-back" onClick={() => navigate(-1)} aria-label="Back">
           ←
         </button>
@@ -95,6 +102,33 @@ export default function TripDetailPage() {
             <p className="trip-note-text">{trip.notes}</p>
           </div>
         )}
+
+        <div className="trip-route-section">
+          <div className="trip-route-head">
+            <span className="trip-route-label">Route</span>
+            <RouteUploader
+              tripId={trip.id}
+              hasRoute={Boolean(trip.route_points && trip.route_points.length > 0)}
+            />
+          </div>
+          {(!trip.route_points || trip.route_points.length === 0) && (
+            <p className="trip-route-empty">No driven route attached yet.</p>
+          )}
+          <details className="route-help">
+            <summary>How do I get a route file?</summary>
+            <p>
+              Upload a CSV with a timestamp column (<code>date</code>/<code>time</code>/<code>timestamp</code>) and
+              coordinate columns (<code>latitude</code>/<code>lat</code>, <code>longitude</code>/<code>lng</code>/
+              <code>lon</code>). Extra columns are ignored.
+            </p>
+            <p>Run this in Grafana against your TeslaMate datasource, then use "Inspect → Data → Download CSV":</p>
+            <pre>{`SELECT date, latitude, longitude
+FROM positions
+WHERE car_id = $car_id
+  AND date BETWEEN '${trip.start_date}' AND '${addDays(trip.end_date, 1)}'
+ORDER BY date`}</pre>
+          </details>
+        </div>
 
         <div className="trip-photos-section">
           <div className="trip-photos-head">
