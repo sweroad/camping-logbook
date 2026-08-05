@@ -30,10 +30,26 @@ function nightsLabel(nights: number): string {
   return `${nights} ${nights === 1 ? "night" : "nights"}`;
 }
 
+const SortIcon = ({ order }: { order: "asc" | "desc" }) => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{ transform: order === "asc" ? "scaleY(-1)" : undefined }}
+  >
+    <path d="M12 5v14M6 13l6 6 6-6" />
+  </svg>
+);
 
 export default function TripListPage() {
   const [query, setQuery] = useState("");
   const [year, setYear] = useState("all");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const { data, isLoading, isError } = useTrips({ limit: 200 });
   const trips = useMemo(() => data?.items ?? [], [data]);
@@ -59,8 +75,10 @@ export default function TripListPage() {
           (formatStayType(t.stay_type) ?? "").toLowerCase().includes(q) ||
           (t.notes ?? "").toLowerCase().includes(q),
       )
-      .sort((a, b) => b.start_date.localeCompare(a.start_date));
-  }, [trips, query, year]);
+      .sort((a, b) =>
+        sortOrder === "desc" ? b.start_date.localeCompare(a.start_date) : a.start_date.localeCompare(b.start_date),
+      );
+  }, [trips, query, year, sortOrder]);
 
   const groups = useMemo(() => {
     const byYear = new Map<string, Trip[]>();
@@ -74,13 +92,13 @@ export default function TripListPage() {
       }
     }
     return Array.from(byYear.entries())
-      .sort((a, b) => b[0].localeCompare(a[0]))
+      .sort((a, b) => (sortOrder === "desc" ? b[0].localeCompare(a[0]) : a[0].localeCompare(b[0])))
       .map(([groupYear, items]) => ({
         year: groupYear,
         items,
         totalNights: items.reduce((sum, t) => sum + t.nights, 0),
       }));
-  }, [filtered]);
+  }, [filtered, sortOrder]);
 
   const totalNights = filtered.reduce((sum, t) => sum + t.nights, 0);
   const tripCount = useMemo(() => countLogicalTrips(filtered), [filtered]);
@@ -100,6 +118,16 @@ export default function TripListPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
+        <button
+          type="button"
+          className="sort-toggle"
+          onClick={() => setSortOrder((o) => (o === "desc" ? "asc" : "desc"))}
+          aria-label={sortOrder === "desc" ? "Sorted newest first" : "Sorted oldest first"}
+          title={sortOrder === "desc" ? "Newest first" : "Oldest first"}
+        >
+          <SortIcon order={sortOrder} />
+          {sortOrder === "desc" ? "Newest" : "Oldest"}
+        </button>
       </div>
 
       <div className="year-chips">

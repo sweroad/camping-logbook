@@ -221,8 +221,23 @@ button[type="submit"]:disabled { opacity: .5; cursor: default; }
    -------------------------------------------------------------------------- */
 .trip-list-subtitle { margin: 8px 0 0; font: 500 13px/1.4 var(--font-ui); color: var(--ink-55); }
 
-.trip-filters { margin: 14px 0 0; }
-.trip-filters input { border-radius: 999px; }
+.trip-filters { display: flex; gap: 8px; margin: 14px 0 0; }
+.trip-filters input { flex: 1; min-width: 0; width: auto; border-radius: 999px; }
+
+.sort-toggle {
+  flex: 0 0 auto;
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 16px;
+  min-height: 0;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--card);
+  font: 600 12px/1 var(--font-ui);
+  color: var(--ink-55);
+  cursor: pointer;
+}
+.sort-toggle:hover { border-color: var(--pine); color: var(--pine); }
+.sort-toggle svg { flex: 0 0 auto; }
 
 .year-chips { display: flex; gap: 8px; padding: 12px 0 4px; margin-bottom: 14px; overflow-x: auto; }
 .year-chip {
